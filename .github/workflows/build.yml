@@ -30,11 +30,11 @@ jobs:
 
       #### CACHE STUFF Start
       - name: Set yarn
-          id: yarn
-          run: |
-            echo "::set-output name=dir::$(yarn cache dir)"
-            echo "::add-path::$(yarn bin)"
-            echo "::add-path::$(yarn global bin)"
+        id: yarn
+        run: |
+          echo "::set-output name=dir::$(yarn cache dir)"
+          echo "::add-path::$(yarn bin)"
+          echo "::add-path::$(yarn global bin)"
 
       - name: Get Yarn cache
         uses: actions/cache@v1.0.3
