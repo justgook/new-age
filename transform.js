@@ -74,16 +74,16 @@ module.exports = function (file, api, options) {
     //         return (path.node);
     //     });
     // Add global declarations unknown by prepack
-    tree.find(j.Declaration).at(0).get()
-        .insertBefore(`
-            __assumeDataProperty(global, "requestAnimationFrame", __abstractOrUndefined("function"));
-            __assumeDataProperty(global, "cancelAnimationFrame", __abstractOrUndefined("function"));
-            __assumeDataProperty(global, "document", __abstract({
-                hidden: __abstractOrUndefined("boolean"),
-                mozHidden: __abstractOrUndefined("boolean"),
-                msHidden: __abstractOrUndefined("boolean"),
-                webkitHidden: __abstractOrUndefined("boolean"),
-            }));`);
+    // tree.find(j.Declaration).at(0).get()
+    //     .insertBefore(`
+    //         __assumeDataProperty(global, "requestAnimationFrame", __abstractOrUndefined("function"));
+    //         __assumeDataProperty(global, "cancelAnimationFrame", __abstractOrUndefined("function"));
+    //         __assumeDataProperty(global, "document", __abstract({
+    //             hidden: __abstractOrUndefined("boolean"),
+    //             mozHidden: __abstractOrUndefined("boolean"),
+    //             msHidden: __abstractOrUndefined("boolean"),
+    //             webkitHidden: __abstractOrUndefined("boolean"),
+    //         }));`);
     //===============================PREPACK MAGIC End ===============================
 
 
