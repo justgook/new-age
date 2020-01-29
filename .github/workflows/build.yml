@@ -10,42 +10,73 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2.0.0
-      with:
-        persist-credentials: false
+      - name: Checkout
+        uses: actions/checkout@v2.0.0
+        with:
+          persist-credentials: false
 
-    - name: Setup Elm
-      uses: justgook/setup-elm@v1
+      - name: Setup Elm
+        uses: justgook/setup-elm@v1
 
-    - name: Setup Node.js for use with actions
-      uses: actions/setup-node@v1.1.0
-      with:
-        node-version: 12.x
+      - name: Setup Node.js for use with actions
+        uses: actions/setup-node@v1.1.0
+        with:
+          node-version: 12.x
 
-    - name: Build
-      run: |
-        elm make src/JumpGun/Build.elm --optimize --output=./gh-pages/JumpGun/build.js
-        elm make src/JumpGun/Game.elm --optimize --output=./gh-pages/JumpGun/game.js
-#    - name: Optimize Javascript Jump
-#      uses: ./.github/actions/optimize-js
-#      with:
-#        file: ./examples/gh-pages/jump.js
-#        transform: ./examples/transform.js
+      - name: Build
+        run: |
+          elm make src/JumpGun/Build.elm --optimize --output=./gh-pages/JumpGun/build.js
+          elm make src/JumpGun/Game.elm --optimize --output=./gh-pages/JumpGun/game.js
 
-#    - name: Optimize Javascript
-#      env:
-#        NODE_ENV: production
-#      run: |
-#        jscodeshift -t transform.js ./gh-pages/bundle.js
-#        uglifyjs ./gh-pages/bundle.js --compress "pure_funcs=[F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9],pure_getters" --output=./gh-pages/bundle.js
-#        prepack ./gh-pages/bundle.js --inlineExpressions --out ./gh-pages/bundle.js --maxStackDepth  10000
-#        uglifyjs ./gh-pages/bundle.js --compress 'keep_fargs=false,unsafe_comps,unsafe' --mangle --output=./gh-pages/bundle.js
+      #### CACHE STUFF Start
+      - name: Set yarn
+          id: yarn
+          run: |
+            echo "::set-output name=dir::$(yarn cache dir)"
+            echo "::add-path::$(yarn bin)"
+            echo "::add-path::$(yarn global bin)"
 
-    - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@3.2.1
-      with:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        BASE_BRANCH: master
-        BRANCH: gh-pages
-        FOLDER: gh-pages
+      - name: Get Yarn cache
+        uses: actions/cache@v1.0.3
+        id: yarn-cache-exists
+        with:
+          path: ${{ steps.yarn.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Get node_modules
+        uses: actions/cache@v1.0.3
+        id: node_modules-cache-exists
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node_modules-
+      - name: Install Dependencies
+        #if: steps.yarn-cache-exists.outputs.cache-hit != 'true'
+        run: |
+          yarn
+          echo "::add-path::$(yarn bin)"
+
+      #### CACHE STUFF Start
+      - name: Optimize Javascript JumpGun/build.js
+        uses: ./.github/actions/optimize-js
+        with:
+          file: ./gh-pages/JumpGun/build.js
+          transform: ./transform.js
+
+      - name: Optimize Javascript JumpGun/game.js
+        uses: ./.github/actions/optimize-js
+        with:
+          file: ./gh-pages/JumpGun/build.js
+          transform: ./transform.js
+
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@3.2.1
+        with:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          BASE_BRANCH: master
+          BRANCH: gh-pages
+          FOLDER: gh-pages
