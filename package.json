@@ -7,6 +7,9 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "glslx": "^0.1.26"
+    "glslx": "0.1.26",
+    "jscodeshift": "0.7.0",
+    "prepack": "0.2.54",
+    "uglify-js": "3.7.6"
   }
 }
