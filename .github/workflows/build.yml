@@ -69,7 +69,7 @@ jobs:
       - name: Optimize Javascript JumpGun/game.js
         uses: ./.github/actions/optimize-js
         with:
-          file: ./gh-pages/JumpGun/build.js
+          file: ./gh-pages/JumpGun/game.js
           transform: ./transform.js
 
 
