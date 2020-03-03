@@ -27,6 +27,7 @@ jobs:
         run: |
           elm make src/JumpGun/Build.elm --optimize --output=./gh-pages/JumpGun/build.js
           elm make src/JumpGun/Game.elm --optimize --output=./gh-pages/JumpGun/game.js
+          elm make src/Maze/Game.elm --optimize --output=./gh-pages/Maze.html
 
       #### CACHE STUFF Start
       - name: Set yarn
@@ -37,7 +38,7 @@ jobs:
           echo "::add-path::$(yarn global bin)"
 
       - name: Get Yarn cache
-        uses: actions/cache@v1.0.3
+        uses: actions/cache@v1.1.0
         id: yarn-cache-exists
         with:
           path: ${{ steps.yarn.outputs.dir }}
@@ -46,7 +47,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Get node_modules
-        uses: actions/cache@v1.0.3
+        uses: actions/cache@v1.1.0
         id: node_modules-cache-exists
         with:
           path: ./node_modules
