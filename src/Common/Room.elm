@@ -192,10 +192,10 @@ generate2 opt depth xy from ( acc, seed, goal ) =
                                             a
                                                 |> Maybe.map
                                                     (\aa ->
-                                                        let
-                                                            _ =
-                                                                Debug.log "rewriting" ( xy, aa.depth, depth )
-                                                        in
+                                                        --let
+                                                        --    _ =
+                                                        --        Debug.log "rewriting" ( xy, aa.depth, depth )
+                                                        --in
                                                         aa.end
                                                     )
                                                 |> Maybe.withDefault v.end
