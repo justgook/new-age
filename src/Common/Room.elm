@@ -2,8 +2,8 @@ module Common.Room exposing (Dir, Exits, Options, Room, Rooms, RoomsWith, XY, ea
 
 import Dict exposing (Dict)
 import Random exposing (Generator)
-import Util.List exposing (remove)
-import Util.Random exposing (few)
+import Util.List as List exposing (remove)
+import Util.Random as Random exposing (few)
 
 
 
@@ -177,9 +177,17 @@ generate2 opt depth xy from ( acc, seed, goal ) =
                         |> applyIf (not mustHaveExit.e) (remove East)
                         |> applyIf (not mustHaveExit.s) (remove South)
                         |> applyIf (not mustHaveExit.w) (remove West)
+
+            ( allWaysFirst, allWaysRest ) =
+                allWays
+
+            gen =
+                Random.map2 Tuple.pair
+                    (exitsGen (opt.next from goal depth moreDoors))
+                    (Random.uniform allWaysFirst allWaysRest)
         in
-        Random.step (exitsGen (opt.next from goal depth moreDoors)) seed
-            |> (\( { exits, data }, ss ) ->
+        Random.step gen seed
+            |> (\( ( { exits, data }, fns ), seed1 ) ->
                     let
                         end =
                             depth >= opt.depth && not goal
@@ -192,10 +200,10 @@ generate2 opt depth xy from ( acc, seed, goal ) =
                                             a
                                                 |> Maybe.map
                                                     (\aa ->
-                                                        --let
-                                                        --    _ =
-                                                        --        Debug.log "rewriting" ( xy, aa.depth, depth )
-                                                        --in
+                                                        let
+                                                            _ =
+                                                                Debug.log "rewriting" ( xy, aa.depth, depth )
+                                                        in
                                                         aa.end
                                                     )
                                                 |> Maybe.withDefault v.end
@@ -203,20 +211,40 @@ generate2 opt depth xy from ( acc, seed, goal ) =
                                     Just { v | end = newEnd }
                                 )
                     in
-                    List.foldl (<|)
-                        ( safeInsert xy
-                            { data = data, exits = exits, end = end, depth = depth }
-                            acc
-                        , ss
+                    List.foldl (\fn -> fn opt exits xy depth)
+                        ( safeInsert xy { data = data, exits = exits, end = end, depth = depth } acc
+                        , seed1
                         , depth >= opt.depth || goal
                         )
-                        --TODO shuffle those functions
-                        [ applyIf exits.n (validate opt (removeN xy) depth (north xy) South)
-                        , applyIf exits.e (validate opt (removeE xy) depth (east xy) West)
-                        , applyIf exits.s (validate opt (removeS xy) depth (south xy) North)
-                        , applyIf exits.w (validate opt (removeW xy) depth (west xy) East)
-                        ]
+                        fns
                )
+
+
+
+--wayShuffle =
+--    Random.uniform [ a, b, c, d ] []
+
+
+allWays =
+    let
+        a opt exits xy depth =
+            applyIf exits.n (validate opt (removeN xy) depth (north xy) South)
+
+        b opt exits xy depth =
+            applyIf exits.e (validate opt (removeE xy) depth (east xy) West)
+
+        c opt exits xy depth =
+            applyIf exits.s (validate opt (removeS xy) depth (south xy) North)
+
+        d opt exits xy depth =
+            applyIf exits.w (validate opt (removeW xy) depth (west xy) East)
+    in
+    case List.permutations [ a, b, c, d ] of
+        x :: xs ->
+            ( x, xs )
+
+        [] ->
+            ( [ a, b, c, d ], [] )
 
 
 validate opt removeDoor depth newXY from ( acc, seed, goal ) =

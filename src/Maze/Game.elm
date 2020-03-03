@@ -197,7 +197,7 @@ moveSystem { keyboard, time } ({ moving, p, level, exits } as memory) =
             )
                 |> (\m ->
                         if Dict.get m.p m.level |> Maybe.map .end |> Maybe.withDefault False then
-                            NextLevel 0 { m | moving = Nothing } (start (m.depth + 1))
+                            NextLevel 0 { m | moving = Nothing } (start (now time) (m.depth + 1))
 
                         else
                             Room m
@@ -227,7 +227,7 @@ update computer memory =
 
         Intro ->
             if computer.keyboard.space then
-                StartGame 0 (start config.initDepth)
+                StartGame 0 (start (now computer.time) config.initDepth)
 
             else
                 memory
@@ -247,11 +247,11 @@ update computer memory =
                 Room b
 
 
-start depth =
+start seed depth =
     let
         seed0 : Random.Seed
         seed0 =
-            Random.initialSeed (412 + depth)
+            Random.initialSeed (seed + depth)
 
         options : Options { visited : Bool }
         options =
